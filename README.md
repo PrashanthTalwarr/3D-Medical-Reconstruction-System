@@ -238,15 +238,7 @@ config = {
 - PyTorch Documentation: https://pytorch.org/docs/
 - AWS SageMaker: https://docs.aws.amazon.com/sagemaker/
 
-## License
-MIT
 
-## Contact
-[Your Name]
-[Your Email]
-
-## Acknowledgments
-Built with PyTorch, Diffusion Models, 3D Vision, CUDA, and AWS SageMaker.
 """
 
 # Write README
