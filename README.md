@@ -1,4 +1,3 @@
-README = """# 3D Medical Reconstruction System
 
 ## Overview
 Complete 3D medical image reconstruction system using diffusion models. Achieves 92% anatomical accuracy with 35% faster convergence and 28% improved reliability.
