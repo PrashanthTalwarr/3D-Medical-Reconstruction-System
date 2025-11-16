@@ -17,6 +17,7 @@ from local.utils import (
     print_model_summary, count_parameters
 )
 
+
 def train_epoch(model, diffusion, dataloader, optimizer, scaler, device, epoch):
     """Train for one epoch"""
     model.train()
@@ -33,11 +34,11 @@ def train_epoch(model, diffusion, dataloader, optimizer, scaler, device, epoch):
         noisy_batch, noise = diffusion.q_sample(batch, t)
         
         # Mixed precision training (CUDA optimization)
-        with torch.cuda.amp.autocast():
+        with torch.amp.autocast('cuda'):
             # Predict noise using model
             predicted_noise = model(noisy_batch, t)
             
-            # Simple MSE loss (can be extended with custom losses)
+            # Simple MSE loss
             loss = F.mse_loss(predicted_noise, noise)
         
         # Backpropagation
@@ -60,24 +61,30 @@ def train_epoch(model, diffusion, dataloader, optimizer, scaler, device, epoch):
 
 @torch.no_grad()
 def evaluate(model, diffusion, test_loader, device):
-    """Evaluate model on test set"""
+    """Evaluate model on test set (UPDATED)"""
     model.eval()
     
-    # Get one batch for evaluation
+    # Get test sample
     test_batch = next(iter(test_loader)).to(device)
     
-    # Add noise at middle timestep
-    t = torch.full((test_batch.shape[0],), diffusion.timesteps // 2, device=device).long()
-    noisy_batch, _ = diffusion.q_sample(test_batch, t)
+    # Add noise at middle timestep for visualization
+    t_mid = torch.full((test_batch.shape[0],), diffusion.timesteps // 2, device=device).long()
+    noisy_batch, _ = diffusion.q_sample(test_batch, t_mid)
     
     # Reconstruct using full diffusion sampling
     print("Generating reconstruction (may take a moment)...")
-    reconstructed, intermediate_steps = diffusion.sample_with_progress(
-        model, test_batch.shape, device
-    )
+    reconstructed = diffusion.sample(model, test_batch.shape, device)
+    
+    # Normalize to [0, 1] range
+    reconstructed = torch.clamp(reconstructed, 0, 1)
+    test_batch = torch.clamp(test_batch, 0, 1)
+    noisy_batch = torch.clamp(noisy_batch, 0, 1)
     
     # Calculate metrics
     metrics = evaluate_reconstruction(reconstructed, test_batch)
+    
+    # Optionally get intermediate steps for visualization
+    intermediate_steps = []
     
     return test_batch, noisy_batch, reconstructed, intermediate_steps, metrics
 
@@ -146,7 +153,7 @@ def main():
         train_dataset,
         batch_size=config['batch_size'],
         shuffle=True,
-        num_workers=4,
+        num_workers=2,
         pin_memory=True if device.type == 'cuda' else False
     )
     test_loader = DataLoader(
@@ -190,7 +197,7 @@ def main():
     )
     
     # Mixed precision scaler (CUDA optimization)
-    scaler = torch.cuda.amp.GradScaler()
+    scaler = torch.amp.GradScaler('cuda')
     
     # EMA for better model stability
     ema = EMA(model, decay=0.9999)
@@ -247,14 +254,16 @@ def main():
     print("Reconstruction Metrics:")
     print("-" * 40)
     for metric, value in metrics.items():
-        print(f"  {metric:12s}: {value:.4f}")
+        emoji = "✅" if (metric == "Dice" and value > 0.85) or (metric == "Accuracy" and value > 90) else "📊"
+        print(f"  {emoji} {metric:12s}: {value:.4f}")
     print("-" * 40)
     
     # Visualizations
     print("\nGenerating visualizations...")
     visualize_reconstruction_comparison(original, noisy, reconstructed)
     plot_metrics_comparison(metrics)
-    visualize_diffusion_process(diffusion_steps)
+    if diffusion_steps:
+        visualize_diffusion_process(diffusion_steps)
     
     # Summary
     print("\n" + "="*60)
