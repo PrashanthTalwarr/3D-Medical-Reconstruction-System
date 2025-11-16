@@ -1,0 +1,51 @@
+CONFIG_YAML = """# Training Configuration
+training:
+  epochs: 50
+  batch_size: 4
+  learning_rate: 0.0001
+  timesteps: 200
+  num_samples: 5000
+  volume_size: 32
+  base_channels: 32
+
+# Model Configuration
+model:
+  in_channels: 1
+  out_channels: 1
+  base_channels: 32
+  time_emb_dim: 128
+
+# Diffusion Configuration
+diffusion:
+  timesteps: 200
+  beta_start: 0.0001
+  beta_end: 0.02
+  schedule: linear
+
+# SageMaker Configuration
+sagemaker:
+  instance_type: ml.p3.2xlarge  # V100 GPU
+  instance_count: 1
+  use_spot_instances: true
+  max_run: 3600  # 1 hour
+  max_wait: 7200  # 2 hours
+
+# Inference Configuration
+inference:
+  instance_type: ml.g4dn.xlarge
+  initial_instance_count: 1
+  serializer: json
+  deserializer: json
+"""
+
+# Write to file
+os.makedirs('sagemaker', exist_ok=True)
+with open('sagemaker/config.yaml', 'w') as f:
+    f.write(CONFIG_YAML)
+
+
+print("✓ SageMaker files created:")
+print("  - sagemaker/train.py")
+print("  - sagemaker/inference.py")
+print("  - sagemaker/requirements.txt")
+print("  - sagemaker/config.yaml")

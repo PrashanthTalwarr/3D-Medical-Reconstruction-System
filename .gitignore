@@ -1,0 +1,103 @@
+﻿# ============================================================
+# 3D Medical Reconstruction System - .gitignore
+# ============================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment (CRITICAL - 41MB+ folder!)
+med_recon_env/
+venv/
+env/
+ENV/
+
+# AWS Credentials (CRITICAL - SECURITY!)
+*.csv
+*_accessKeys.csv
+*_credentials.csv
+prashanth-cli_accessKeys.csv
+prashanth-cli_credentials.csv
+.aws/
+*.pem
+*.key
+
+# Large Installers (41MB file!)
+*.msi
+AWSCLIV2.msi
+*.exe
+*.dmg
+*.pkg
+
+# Data files (Large volumes - .pt files!)
+data/
+data/synthetic/
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+*.h5
+*.hdf5
+volume_*.pt
+
+# Model Checkpoints (Can be large!)
+checkpoints/
+*.pkl
+*.pickle
+
+# Training Results
+results/
+runs/
+logs/
+
+# Medical Image Formats (Large files!)
+*.nii
+*.nii.gz
+*.dcm
+*.dicom
+*.mha
+*.mhd
+
+# Notebooks checkpoints
+notebooks/.ipynb_checkpoints/
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+
+# Logs
+*.log
+tensorboard/
+
+# Environment variables
+.env
+.env.local
+
+# Jupyter
+*.ipynb_checkpoints
+
+# PyTorch specific
+*.pth.tar
+lightning_logs/
+
+# TensorBoard
+events.out.tfevents.*
